@@ -255,3 +255,10 @@ runs/
 
 # --- Jupyter Notebook ---
 .ipynb_checkpoints
+
+# 密钥
+.env
+# 生成的数据
+data/generated/
+# 缓存
+__pycache__/
