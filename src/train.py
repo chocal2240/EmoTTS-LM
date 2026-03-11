@@ -58,3 +58,24 @@ def train():
 
 if __name__ == "__main__":
     train()
+    
+# src/train.py (LoRA 部分示例)
+from peft import LoraConfig, get_peft_model, TaskType
+
+# 1. 定义 LoRA 配置
+lora_config = LoraConfig(
+    r=8,                  # 秩，越大效果越好但显存占用越高
+    lora_alpha=32,        # 缩放系数
+    target_modules=["q_proj", "v_proj"], # 针对 Transformer 的 Q/V 矩阵
+    lora_dropout=0.1,
+    bias="none",
+    task_type=TaskType.CAUSAL_LM # 或 SEQ_2_SEQ_LM
+)
+
+# 2. 包装模型
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters() 
+# 输出示例：trainable params: 0.5% || all params: 100% (体现参数高效)
+
+# 3. 训练 (显存占用大幅降低)
+# 后续训练代码不变...
