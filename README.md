@@ -1,113 +1,122 @@
-# 🎙️ EmoTTS-LM: 基于文本的情感语音大模型
+# EmoTTS-LM
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Status](https://img.shields.io/badge/status-in%20development-orange)](https://github.com/yourusername/EmoTTS-LM)
+文本驱动的心理咨询场景情感语音合成项目（Qwen3-TTS + LoRA）。
 
-> **项目简介**：本项目旨在构建一个能够根据文本内容自动生成带有特定情感色彩语音的大模型。支持多种情感控制（如高兴、悲伤、愤怒等），实现高自然度的情感语音合成。
->
-> **Project Description**: This project aims to build a large model capable of automatically generating speech with specific emotional colors based on text content. It supports multiple emotion controls (e.g., happy, sad, angry) to achieve high-naturalness emotional speech synthesis.
+本仓库当前定位是研究型仓库：提供已发布数据集、阶段性实验结果、原型代码与文档材料。
 
----
+## 项目目标
 
-## 📰 更新日志 (News)
+围绕心理健康辅助交互场景，构建可控制情感与语速的中文语音合成流程，重点关注“安抚/平静/鼓励”等表达风格。
 
-<!-- 请随项目进展动态更新此处 -->
-- **[2024-XX-XX]**: 项目初始化，仓库建立 (Project initialized).
-- **[TODO]**: 完成数据预处理模块 (Complete data preprocessing).
-- **[TODO]**: 完成基线模型搭建 (Complete baseline model).
-- **[TODO]**: 发布第一个 Demo 音频 (Release first demo audio).
+## 当前成果
 
----
+- 完成 PsyQA 文本清洗、规范化与扩展。
+- 生成并发布情感语音数据集（1500 条）。
+- 完成 LoRA 定向微调与阶段性验证。
+- 提供论文草稿与数据集卡片，支持结果说明与复核。
 
-## ✨ 主要功能 (Features)
+## 关键结果
 
-- 🎯 **多情感控制 (Multi-emotion Control)**：支持通过文本标签控制输出语音的情感色彩。
-- 🚀 **高自然度 (High Naturalness)**：基于 Transformer 架构，生成语音流畅自然。
-- 📚 **端到端训练 (End-to-End Training)**：提供完整的训练与推理 pipeline。
-- 🛠️ **易于扩展 (Easy to Extend)**：模块化代码设计，方便添加新情感或调整模型结构。
+- BERT 弱监督情感分类准确率：0.9659
+- 发布数据量：1500
+- 情感分布：calm 764 / excited 736
+- 数据清洗后回答保留率：92.39%
 
----
+说明：音频文件体积较大，`dataset/dataset_wavs/` 默认不随 Git 仓库提交，仓库内保留发布清单与统计信息。
 
-## 📦 安装指南 (Installation)
+详细说明：
 
-### 1. 环境准备 (Environment Setup)
-确保已安装 Python 3.8+ 和 PyTorch。
+- 报告草稿：`doc.txt`
+- 数据集说明：`dataset/dataset_publish/README.md`
+- 数据集卡片：`dataset/dataset_publish/DATASET_CARD.md`
+
+## 仓库结构
+
+```text
+EmoTTS-LM/
+|- src/
+|  |- data_generation/         # LLM 数据增强与标注相关脚本
+|  |- models/                  # 模型结构原型
+|  `- utils/
+|- dataset/
+|  |- dataset_publish/         # 发布说明、清单、统计
+|  `- dataset_wavs/            # 发布音频（默认不随仓库提交）
+|- data/                       # 中间数据目录与约定
+|- checkpoints/                # 权重目录（当前未随仓库发布）
+|- assets/
+|- doc/                        # 文档目录（索引见 doc/README.md）
+|- doc.txt                     # 论文草稿（持续修订）
+|- demo.py                     # 演示入口（待补全）
+|- test_model.py               # 模型结构冒烟测试
+`- requirements.txt
+```
+
+## 快速开始
+
+### 1. 环境安装
 
 ```bash
-# 克隆仓库 (Clone Repository)
-git clone https://github.com/yourusername/EmoTTS-LM.git
+git clone <your-repo-url>
 cd EmoTTS-LM
+python -m venv .venv
 
-# 创建虚拟环境 (Create Virtual Environment)
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# .\venv\Scripts\activate  # Windows
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
 
-# 安装依赖 (Install Dependencies)
+# Linux / macOS
+# source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
-### 2. 数据准备 (Data Preparation)
-由于数据集较大，未包含在仓库中。请参考 [data/README.md](data/README.md) 下载数据集并放置到 `data/raw/` 目录。
+### 2. 校验发布数据
 
-### 3. 模型权重 (Model Weights)
-预训练权重请参考 [Checkpoints](#checkpoints) 部分下载。
-
----
-
-## 🚀 快速开始 (Quick Start)
-
-### 推理示例 (Inference)
 ```bash
-python src/inference.py --text "今天天气真好" --emotion "happy" --output ./output.wav
+python -c "import pandas as pd; df = pd.read_csv('dataset/dataset_publish/dataset_manifest.txt', sep='\t'); print('samples:', len(df)); print(df['emotion'].value_counts().to_string())"
 ```
 
-### 训练示例 (Training)
+### 3. 运行模型结构冒烟测试
+
 ```bash
-python src/train.py --config configs/default.yaml
+python test_model.py
 ```
 
----
+### 4. 运行 LLM 增强脚本
 
-## 🎧 在线演示 (Demo)
+```bash
+# 需先在 .env 中配置 LLM_API_KEY / LLM_API_BASE_URL / LLM_MODEL_NAME
+python src/data_generation/llm_generator.py
+```
 
-| 文本内容 (Text) | 情感 (Emotion) | 音频预览 (Audio Preview) |
-| :--- | :---: | :---: |
-| "恭喜你获得了第一名！" | 😄 Happy | 🔊 [播放音频](assets/demo_happy.wav) |
-| "很遗憾听到这个消息..." | 😢 Sad | 🔊 [播放音频](assets/demo_sad.wav) |
-| "你怎么能这样对我？" | 😡 Angry | 🔊 [播放音频](assets/demo_angry.wav) |
+## 复现边界说明
 
-*(注：以上音频为占位符，项目进展后将更新真实生成效果)*
+当前仓库中的 `src/train.py` 与 `src/inference.py` 仍是原型流程脚手架，不是最终版可复现实验脚本。
 
----
+可直接复用的部分：
 
-## 🏆 项目背景 (Project Background)
+- 发布数据集与清单
+- 数据增强调用示例
+- 基础模型结构原型
 
-本项目受 **校级大学生创新创业训练计划** 资助。  
-This work is supported by the **University-level Undergraduate Training Program for Innovation and Entrepreneurship**.
+暂未完整开源的部分：
 
-- **项目编号 (Grant No.)**: `[请填写项目编号]`
-- **项目级别 (Project Level)**: 校级 (University-level)
+- 最终训练流水线（包含完整 LoRA 训练配置）
+- 可直接推理的最终适配器权重
+- 完整演示程序入口
 
---- 
+如果用于论文复现，建议以 `dataset/dataset_publish/` 与 `doc.txt` 结果描述为基准，并按你的本地实验环境补全训练与推理脚本。
 
-## 📚 参考文献 (References)
+## 后续计划
 
+- 补齐可复现实验版训练脚本与推理脚本。
+- 发布 LoRA 适配器与加载说明。
+- 增加 demo 音频与评测脚本（主观/客观指标）。
 
----
+## 许可证
 
-## 📄 许可证 (License)
+本项目使用 [MIT License](LICENSE)。
 
-本项目采用 [MIT 许可证](LICENSE) 开源。  
-This project is licensed under the [MIT License](LICENSE).
+## 联系方式
 
----
-
-## 📬 联系方式 (Contact)
-
-如有问题或合作意向，请通过以下方式联系：  
-For any questions or collaboration inquiries, please contact:
-
-- 📧 **Email**: `fanqt2024@lzu.edu.cn`
-- 🐱 **GitHub**: [`chocalbushnell-dotcom`](https://github.com/chocalbushnell-dotcom)
+- Email: fanqt2024@lzu.edu.cn
+- GitHub: https://github.com/chocalbushnell-dotcom
