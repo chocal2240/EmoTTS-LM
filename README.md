@@ -1,57 +1,94 @@
 # EmoTTS-LM
 
-文本驱动的心理咨询场景情感语音合成项目（Qwen3-TTS + LoRA）。
-
-本仓库当前定位是研究型仓库：提供已发布数据集、阶段性实验结果、原型代码与文档材料。
-
-## 项目目标
-
-围绕心理健康辅助交互场景，构建可控制情感与语速的中文语音合成流程，重点关注“安抚/平静/鼓励”等表达风格。
-
-## 当前成果
-
-- 完成 PsyQA 文本清洗、规范化与扩展。
-- 生成并发布情感语音数据集（1500 条）。
-- 完成 LoRA 定向微调与阶段性验证。
-- 提供数据集卡片与发布说明，支持结果说明与复核。
-
-## 关键结果
-
-- BERT 弱监督情感分类准确率：0.9659
-- 发布数据量：1500
-- 情感分布：calm 764 / excited 736
-- 数据清洗后回答保留率：92.39%
-
-说明：音频文件体积较大，仓库默认不提交 `dataset_wavs` 音频目录，仅保留发布清单与统计信息。
-
-详细说明：
-
-- 数据集说明：`dataset/dataset_publish/README.md`
-- 数据集卡片：`dataset/dataset_publish/DATASET_CARD.md`
+本项目通过 GitHub Release 分发可部署资产，包含客户端应用、服务端 API、LoRA 适配器和部署文档。
 
 ## 仓库结构
 
 ```text
 EmoTTS-LM/
-|- src/
-|  |- data_generation/         # LLM 数据增强与标注相关脚本
-|  |- models/                  # 模型结构原型
-|  `- utils/
-|- dataset/
-|  `- dataset_publish/         # 发布说明、清单、统计
-|- data/                       # 中间数据目录与约定
-|- checkpoints/                # 权重目录（当前未随仓库发布）
-|- assets/
-|- doc/                        # 文档目录（索引见 doc/README.md）
-|- test_model.py               # 模型结构冒烟测试
-`- requirements.txt
+|- lora_tts/
+|  |- README_RELEASE.md
+|  |- app/
+|  |  |- main.py
+|  |  |- requirements-app.txt
+|  |  |- run_app.bat
+|  |  `- tts_config.example.json
+|  |- server/
+|  |  |- api_server.py
+|  |  |- requirements-server.txt
+|  |  |- start_server.sh
+|  |  `- tts_text_enhancer.py
+|  |- model/
+|  |  |- adapter_config.json
+|  |  |- adapter_model.safetensors
+|  |  `- README.md
+|  `- docs/
+|     |- GITHUB_RELEASE_ASSETS.md
+|     `- INSTALL_AND_CONNECT.md
+|- .env.example
+|- .gitignore
+|- LICENSE
+|- requirements.txt
+`- README.md
 ```
 
-> 注：如需完整音频，请在本地额外准备 `dataset/dataset_wavs/`，并与 `dataset/dataset_publish/dataset_manifest.txt` 配套使用。
+## 发布版部署（推荐）
+
+### 1. 下载发行版
+
+从 GitHub Release 下载并解压发布包（建议保留目录结构不变）。
+
+### 2. 环境要求
+
+- Python 3.10+
+- 服务端建议 Linux + CUDA GPU
+- 客户端建议 Windows（可直接使用 `run_app.bat`）
+
+### 3. 启动服务端（Linux）
+
+```bash
+cd lora_tts/server
+pip install -r requirements-server.txt
+
+# 按实际路径配置
+export BASE_MODEL=Qwen/Qwen3-TTS-12Hz-1.7B-Base
+export ADAPTER_PATH=/abs/path/to/lora_tts/model
+export REF_AUDIO_DEFAULT=/abs/path/to/ref.wav
+export API_KEY=sk-test
+
+bash start_server.sh
+```
+
+健康检查：
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+### 4. 启动客户端（Windows）
+
+```bat
+cd lora_tts\app
+run_app.bat
+```
+
+首次运行会自动创建虚拟环境并安装 `requirements-app.txt`。
+
+### 5. 客户端连接服务端
+
+在 GUI 模型设置中填写：
+
+- API URL：`http://<服务器IP>:8000/v1/tts`
+- API Key：与服务端 `API_KEY` 一致
+- Adapter Path：可选；默认由服务端 `ADAPTER_PATH` 控制
+
+## 依赖说明（仓库公开）
+
+- 根目录 `requirements.txt`：聚合依赖，适合快速安装完整运行环境。
+- `lora_tts/app/requirements-app.txt`：仅客户端 GUI 依赖。
+- `lora_tts/server/requirements-server.txt`：仅服务端 API 依赖。
 
 ## 快速开始
-
-### 1. 环境安装
 
 ```bash
 git clone https://github.com/chocal2240/EmoTTS-LM.git
@@ -61,54 +98,21 @@ python -m venv .venv
 # Windows PowerShell
 .venv\Scripts\Activate.ps1
 
-# Linux / macOS
-# source .venv/bin/activate
-
 pip install -r requirements.txt
 ```
 
-### 2. 校验发布数据
+如需分别安装：
 
 ```bash
-python -c "import pandas as pd; df = pd.read_csv('dataset/dataset_publish/dataset_manifest.txt', sep='\t'); print('samples:', len(df)); print(df['emotion'].value_counts().to_string())"
+pip install -r lora_tts/app/requirements-app.txt
+pip install -r lora_tts/server/requirements-server.txt
 ```
 
-### 3. 运行模型结构冒烟测试
+## 说明
 
-```bash
-python test_model.py
-```
-
-### 4. 运行 LLM 增强脚本
-
-```bash
-# 需先在 .env 中配置 LLM_API_KEY / LLM_API_BASE_URL / LLM_MODEL_NAME
-python src/data_generation/llm_generator.py
-```
-
-## 复现边界说明
-
-当前仓库中的 `src/train.py` 与 `src/inference.py` 仍是原型流程脚手架，不是最终版可复现实验脚本。
-
-可直接复用的部分：
-
-- 发布数据集与清单
-- 数据增强调用示例
-- 基础模型结构原型
-
-暂未完整开源的部分：
-
-- 最终训练流水线（包含完整 LoRA 训练配置）
-- 可直接推理的最终适配器权重
-- 完整演示程序入口
-
-如果用于论文复现，建议以 `dataset/dataset_publish/` 中的发布说明与统计信息为基准，并按你的本地实验环境补全训练与推理脚本。
-
-## 后续计划
-
-- 补齐可复现实验版训练脚本与推理脚本。
-- 发布 LoRA 适配器与加载说明。
-- 增加 demo 音频与评测脚本（主观/客观指标）。
+- 模型目录提供 LoRA 适配器，不包含完整基座模型。
+- `REF_AUDIO_DEFAULT` 必须指向一个可访问的参考音频文件（wav）。
+- 仓库中的 `requirements.txt` 建议公开维护，不应在 `.gitignore` 中忽略。
 
 ## 许可证
 

@@ -246,7 +246,6 @@ dataset/dataset_wavs/
 *.zip
 *.tar.gz
 *.csv
-*.txt
 
 # --- Logs & Temp ---
 logs/

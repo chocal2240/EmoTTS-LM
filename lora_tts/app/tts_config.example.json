@@ -1,0 +1,12 @@
+{
+  "api_url": "http://YOUR_SERVER_IP:8000/v1/tts",
+  "api_key": "sk-test",
+  "model": "tts-1",
+  "adapter_path": "/abs/path/to/adapter",
+  "emotion_intensity": 1.0,
+  "persona": "心理咨询师",
+  "emotion": "平静支持 (soothing)",
+  "volume": 0.8,
+  "viz_mode": "wave",
+  "audio_history": []
+}

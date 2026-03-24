@@ -1,0 +1,26 @@
+# EmoTTS-LM 发布版聚合依赖（公开维护）
+# 单端安装可改用：
+# - lora_tts/app/requirements-app.txt
+# - lora_tts/server/requirements-server.txt
+
+# App (GUI)
+customtkinter>=5.2.0
+pygame>=2.5.0
+requests>=2.31.0
+
+# Server (API)
+fastapi>=0.110.0
+uvicorn>=0.29.0
+pydantic>=2.0.0
+soundfile>=0.12.1
+
+# Model runtime
+torch>=2.3.0
+transformers>=4.45.0
+peft>=0.10.0
+
+# Common utilities
+numpy>=1.24.0
+
+# Note:
+# qwen_tts 为 Qwen3-TTS 运行时依赖，请按官方安装说明准备。
