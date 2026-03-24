@@ -2,9 +2,12 @@
 
 本项目核心路线是基于 Qwen3-TTS 基座模型，通过 LoRA 参数高效微调，解决“基于文本驱动的心理咨询语音数据合成”任务。
 
-本项目通过 GitHub Release 分发可部署资产，目标是让第三方下载后可直接完成服务端部署与客户端联调。
+> **⚠️ 重要提示**：  
+> 本项目仅提供 **模型训练代码** 与 **应用客户端**，**不提供公共 API 服务**。  
+> 
+> 要使用本软件，**您必须自行部署服务端**（可以是远程服务器或本地高性能电脑），随后并在客户端中配置连接地址。
 
-最新发行版已包含 1500 条语音数据集，可用于部署后功能验证与效果试听。
+本项目通过 GitHub Release 分发可部署资产，最新发行版已包含 1500 条语音数据集，可用于部署后功能验证与效果试听。
 
 ## 目录结构
 
@@ -17,90 +20,86 @@ EmoTTS-LM/
 `- README.md
 ```
 
-## 发布版部署
+## 部署模式说明
 
-### 第 1 步：下载发行版
+本项目采用 **Client-Server (客户端-服务端)** 架构，支持两种部署模式：
 
-从 Releases 下载并解压，建议保持 `lora_tts/` 目录结构不变。
+1. **远程部署（推荐）**：服务端部署在 Linux GPU 服务器上，客户端运行在个人 Windows 电脑上。
+2. **本地部署**：服务端与客户端均运行在同一台带有 NVIDIA 显卡的 Windows 电脑上。
 
-发行版资产包括应用端、服务端、LoRA 适配器，以及 1500 条语音数据集。
+---
 
-### 第 2 步：服务端部署（Linux + GPU）
+## 模式一：远程部署（Linux 服务端 + Windows 客户端）
 
+### 1. 服务端部署 (Linux)
+*适用场景：拥有云服务器或局域网 GPU服务器。*
+
+请将 `lora_tts/server` 目录上传至服务器。
+
+**环境要求：**
+- 操作系统：Ubuntu 20.04+ / Debian 11+
+- Python：3.10+
+- GPU：NVIDIA 显卡（显存建议 12GB+）
+- CUDA：11.8 或 12.1
+
+**启动步骤：**
 ```bash
 cd lora_tts/server
 pip install -r requirements-server.txt
 
-export BASE_MODEL=Qwen/Qwen3-TTS-12Hz-1.7B-Base
-export ADAPTER_PATH=/abs/path/to/lora_tts/model
-export REF_AUDIO_DEFAULT=/abs/path/to/ref.wav
-export API_KEY=sk-test
+# 设置环境变量（建议写入启动脚本）
+export BASE_MODEL=Qwen/Qwen3-TTS-12Hz-1.7B-Base  # 基座模型路径或 HuggingFace ID
+export ADAPTER_PATH=/your/path/to/lora_tts/model # 指向发行版中的 model 目录
+export REF_AUDIO_DEFAULT=/your/path/to/ref.wav   # 发行版 data 目录下的任意 wav 文件
+export API_KEY=sk-test                           # 自定义您的 API 密钥
 
 bash start_server.sh
 ```
 
-健康检查：
+### 2. 客户端连接 (Windows)
+*适用场景：普通办公/家用电脑。*
 
-```bash
-curl http://127.0.0.1:8000/health
-```
+**启动步骤：**
+1. 下载发行版并解压。
+2. 进入 `lora_tts\app` 目录。
+3. 双击运行 `run_app.bat`（首次运行会自动配置环境）。
 
-### 第 3 步：客户端启动（Windows）
+**配置连接：**
+在客户端界面中填写：
+- **API URL**: `http://<服务器公网或局域网IP>:8000/v1/tts`
+- **API Key**: `sk-test` (与服务端设置一致)
 
-```bat
-cd lora_tts\app
-run_app.bat
-```
+---
 
-首次运行会自动创建虚拟环境并安装依赖。
+## 模式二：本地一体化部署 (Windows Only)
 
-### 第 4 步：连接参数
+*适用场景：拥有一台带 NVIDIA 显卡的高性能 Windows 电脑，希望单机运行。*
 
-在 GUI 中填写：
+### 1. 启动服务端 (Windows)
+打开 PowerShell 或 CMD，进入 `lora_tts\server` 目录：
 
-- API URL: `http://<SERVER_IP>:8000/v1/tts`
-- API Key: 与服务端 `API_KEY` 保持一致
-- Adapter Path: 可选（默认由服务端 `ADAPTER_PATH` 控制）
-
-## 本地一体化部署
-
-如果你希望在同一台机器直接跑通模型与应用，可按下面步骤执行。
-
-### 方案 A：同机启动服务端 + 客户端
-
-终端 A（启动服务端）：
-
-```bash
-cd lora_tts/server
+```powershell
 pip install -r requirements-server.txt
 
-export BASE_MODEL=Qwen/Qwen3-TTS-12Hz-1.7B-Base
-export ADAPTER_PATH=/abs/path/to/lora_tts/model
-export REF_AUDIO_DEFAULT=/abs/path/to/ref.wav
-export API_KEY=sk-local
+# 设置环境变量 (PowerShell 示例)
+$env:BASE_MODEL="Qwen/Qwen3-TTS-12Hz-1.7B-Base"
+$env:ADAPTER_PATH="D:\path\to\lora_tts\model"
+$env:REF_AUDIO_DEFAULT="D:\path\to\lora_tts\data\sample.wav"
+$env:API_KEY="sk-local"
 
-bash start_server.sh
+# 启动服务
+python main.py
 ```
+*(注：请保持该窗口开启，不要关闭)*
 
-终端 B（启动客户端）：
+### 2. 启动客户端 (Windows)
+双击 `lora_tts\app\run_app.bat`。
 
-```bat
-cd lora_tts\app
-run_app.bat
-```
+### 3. 配置连接
+- **API URL**: `http://127.0.0.1:8000/v1/tts`
+- **API Key**: `sk-local`
 
-GUI 连接参数（同机）：
-
-- API URL: `http://127.0.0.1:8000/v1/tts`
-- API Key: `sk-local`
-
-### 方案 B：仅本地验证服务端
-
-```bash
-curl http://127.0.0.1:8000/health
-```
-
-返回 `status: ok` 后，再启动 app 进行语音生成测试。
+---
 
 ## 模型与数据说明
 
