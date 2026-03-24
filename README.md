@@ -22,7 +22,7 @@
 - 情感分布：calm 764 / excited 736
 - 数据清洗后回答保留率：92.39%
 
-说明：音频文件体积较大，`dataset/dataset_wavs/` 默认不随 Git 仓库提交，仓库内保留发布清单与统计信息。
+说明：音频文件体积较大，仓库默认不提交 `dataset_wavs` 音频目录，仅保留发布清单与统计信息。
 
 详细说明：
 
@@ -39,17 +39,17 @@ EmoTTS-LM/
 |  |- models/                  # 模型结构原型
 |  `- utils/
 |- dataset/
-|  |- dataset_publish/         # 发布说明、清单、统计
-|  `- dataset_wavs/            # 发布音频（默认不随仓库提交）
+|  `- dataset_publish/         # 发布说明、清单、统计
 |- data/                       # 中间数据目录与约定
 |- checkpoints/                # 权重目录（当前未随仓库发布）
 |- assets/
 |- doc/                        # 文档目录（索引见 doc/README.md）
 |- doc.txt                     # 论文草稿（持续修订）
-|- demo.py                     # 演示入口（待补全）
 |- test_model.py               # 模型结构冒烟测试
 `- requirements.txt
 ```
+
+> 注：如需完整音频，请在本地额外准备 `dataset/dataset_wavs/`，并与 `dataset/dataset_publish/dataset_manifest.txt` 配套使用。
 
 ## 快速开始
 
@@ -119,4 +119,4 @@ python src/data_generation/llm_generator.py
 ## 联系方式
 
 - Email: fanqt2024@lzu.edu.cn
-- GitHub: https://github.com/chocalbushnell-dotcom
+- GitHub: https://github.com/chocal2240/EmoTTS-LM
