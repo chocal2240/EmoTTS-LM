@@ -4,7 +4,6 @@
 
 ## 当前可用文档
 
-- 主报告草稿：`../doc.txt`
 - 数据集说明：`../dataset/dataset_publish/README.md`
 - 数据集卡片：`../dataset/dataset_publish/DATASET_CARD.md`
 

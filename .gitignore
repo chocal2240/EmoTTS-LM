@@ -260,6 +260,8 @@ runs/
 
 # 密钥
 .env
+# 本地草稿文档
+doc.txt
 # 生成的数据
 data/generated/
 # 缓存
